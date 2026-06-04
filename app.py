@@ -1,7 +1,8 @@
-from flask import Flask, render_template
-from database.db import init_db, seed_db
+from flask import Flask, render_template, request, session, redirect, url_for
+from database.db import init_db, seed_db, create_user, get_user_by_email
 
 app = Flask(__name__)
+app.secret_key = "zamah-dev-secret"
 
 with app.app_context():
     init_db()
@@ -19,6 +20,28 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not name:
+            return render_template("register.html", error="Name is required.", name=name, email=email)
+        if not email:
+            return render_template("register.html", error="Email is required.", name=name, email=email)
+        if len(password) < 8:
+            return render_template("register.html", error="Password must be at least 8 characters.", name=name, email=email)
+        if password != confirm_password:
+            return render_template("register.html", error="Passwords do not match.", name=name, email=email)
+        if get_user_by_email(email):
+            return render_template("register.html", error="Email already registered.", name=name, email=email)
+
+        user_id = create_user(name, email, password)
+        session["user_id"] = user_id
+        session["user_name"] = name
+        return redirect(url_for("dashboard"))
+
     return render_template("register.html")
 
 
@@ -40,6 +63,11 @@ def privacy():
 # ------------------------------------------------------------------ #
 # Placeholder routes — students will implement these                  #
 # ------------------------------------------------------------------ #
+
+@app.route("/dashboard")
+def dashboard():
+    return "Dashboard — coming in Step 3"
+
 
 @app.route("/logout")
 def logout():
