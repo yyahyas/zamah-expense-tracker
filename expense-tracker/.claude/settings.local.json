@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init)",
+      "Bash(\"C:\\\\Users\\\\SAMAUNG\\\\Downloads\\\\CLAUDE CODE\\\\expense-tracker\\\\venv\\\\Scripts\\\\python.exe\" app.py)",
+      "Bash(Start-Sleep -Seconds 2)",
+      "Bash(curl -s http://localhost:5001/)",
+      "Bash(Select-String -Pattern \"title|Zamah|body\")",
+      "Bash(Select-Object -First 5)",
+      "PowerShell(Start-Sleep -Seconds 2; try { $r = Invoke-WebRequest -Uri \"http://localhost:5001/\" -UseBasicParsing; $r.StatusCode } catch { \"Server not responding: $_\" })",
+      "PowerShell(Get-Command *)",
+      "PowerShell(npx playwright --version 2>$null)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(Test-Path \"C:\\\\Users\\\\SAMAUNG\\\\Downloads\\\\CLAUDE CODE\\\\expense-tracker\\\\expense-tracker\\\\zamah.db\")",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git pull *)",
+      "Bash(..venvScriptspython.exe -c ' *)",
+      "Bash(python _seed_expenses_temp.py)",
+      "Bash(python -c ' *)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "Bash(git *)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\SAMAUNG\\\\Downloads\\\\CLAUDE CODE\\\\zamah-expense-tracker\\\\expense-tracker\\\\.claude\\\\specs\")",
+      "Bash(Out-Null)"
+    ]
+  }
+}
