@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "zamah.db")
 
@@ -71,6 +71,11 @@ def seed_db():
 def get_user_by_email(email):
     db = get_db()
     return db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+
+
+def get_user_by_id(user_id):
+    db = get_db()
+    return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
 
 def create_user(name, email, password):
