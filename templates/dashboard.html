@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Zamah Expense Tracker{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+    <div class="dashboard-container">
+
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Welcome back, {{ session['user_name'] }}</h1>
+            <p class="dashboard-subtitle">Here's an overview of your spending.</p>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <p class="summary-label">Total Spent</p>
+                <p class="summary-value">₨ —</p>
+                <p class="summary-note">All time</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">This Month</p>
+                <p class="summary-value">₨ —</p>
+                <p class="summary-note">Current month</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Top Category</p>
+                <p class="summary-value">—</p>
+                <p class="summary-note">By amount</p>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{{ url_for('add_expense') }}" class="btn-primary">+ Add Expense</a>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

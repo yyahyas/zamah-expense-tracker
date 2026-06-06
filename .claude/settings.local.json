@@ -26,7 +26,8 @@
       "Bash(gh api *)",
       "Bash(git *)",
       "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\SAMAUNG\\\\Downloads\\\\CLAUDE CODE\\\\zamah-expense-tracker\\\\expense-tracker\\\\.claude\\\\specs\")",
-      "Bash(Out-Null)"
+      "Bash(Out-Null)",
+      "Bash(..\\\\venv\\\\Scripts\\\\python.exe -c \"import app; print\\('App imports OK'\\)\")"
     ]
   }
 }

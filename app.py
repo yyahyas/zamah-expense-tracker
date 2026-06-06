@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from database.db import init_db, seed_db, create_user, get_user_by_email
+from werkzeug.security import check_password_hash
+from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id
 
 app = Flask(__name__)
 app.secret_key = "zamah-dev-secret"
@@ -20,6 +21,9 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect(url_for("dashboard"))
+
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip()
@@ -47,6 +51,21 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if session.get("user_id"):
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+
+        user = get_user_by_email(email) if email else None
+        if not user or not password or not check_password_hash(user["password_hash"], password):
+            return render_template("login.html", error="Invalid email or password.", email=email)
+
+        session["user_id"] = user["id"]
+        session["user_name"] = user["name"]
+        return redirect(url_for("dashboard"))
+
     return render_template("login.html")
 
 
@@ -66,12 +85,15 @@ def privacy():
 
 @app.route("/dashboard")
 def dashboard():
-    return "Dashboard — coming in Step 3"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+    return render_template("dashboard.html")
 
 
 @app.route("/logout")
 def logout():
-    return "Logout — coming in Step 3"
+    session.clear()
+    return redirect(url_for("landing"))
 
 
 @app.route("/profile")
