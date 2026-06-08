@@ -6,3 +6,6 @@ __pycache__/
 .env
 .DS_Store
 .claude/plans/
+verify-stdout.txt
+verify-stderr.txt
+zamah.db
