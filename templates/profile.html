@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — Zamah Expense Tracker{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+    <div class="dashboard-container">
+
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Your <em>profile</em></h1>
+            <p class="dashboard-subtitle">Manage your account details and password.</p>
+        </div>
+
+        {% if message %}
+        <div class="profile-success">{{ message }}</div>
+        {% elif error %}
+        <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <div class="profile-grid">
+
+            <!-- Account details -->
+            <div class="auth-card">
+                <h2 class="profile-card-title">Account details</h2>
+
+                <p class="profile-meta-label">Member since</p>
+                <p class="profile-meta-value">{{ user['created_at'][:10] }}</p>
+
+                <form method="POST" action="{{ url_for('profile_update') }}">
+                    <div class="form-group">
+                        <label for="name">Full name</label>
+                        <input type="text" id="name" name="name"
+                               class="form-input" placeholder="Yousaf Shamozai"
+                               value="{{ user['name'] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input type="email" id="email" name="email"
+                               class="form-input" placeholder="yousaf@example.com"
+                               value="{{ user['email'] }}" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Save changes</button>
+                </form>
+            </div>
+
+            <!-- Change password -->
+            <div class="auth-card">
+                <h2 class="profile-card-title">Change password</h2>
+
+                <form method="POST" action="{{ url_for('profile_password') }}">
+                    <div class="form-group">
+                        <label for="current_password">Current password</label>
+                        <input type="password" id="current_password" name="current_password"
+                               class="form-input" placeholder="Your current password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New password</label>
+                        <input type="password" id="new_password" name="new_password"
+                               class="form-input" placeholder="Min. 8 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm new password</label>
+                        <input type="password" id="confirm_password" name="confirm_password"
+                               class="form-input" placeholder="Repeat new password" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Update password</button>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

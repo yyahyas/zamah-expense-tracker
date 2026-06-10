@@ -557,6 +557,7 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 700px) {
     .summary-cards { grid-template-columns: 1fr; }
+    .profile-grid { grid-template-columns: 1fr; }
 }
 
 /* ------------------------------------------------------------------ */
@@ -666,6 +667,49 @@ a { color: inherit; text-decoration: none; }
 }
 
 .footer-links a:hover { color: var(--paper); }
+
+/* ------------------------------------------------------------------ */
+/* Profile page                                                        */
+/* ------------------------------------------------------------------ */
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.profile-card-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+}
+
+.profile-meta-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    margin-bottom: 0.25rem;
+}
+
+.profile-meta-value {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin-bottom: 1.25rem;
+}
+
+.profile-success {
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid #c3d9c9;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
 
 /* ------------------------------------------------------------------ */
 /* Responsive                                                          */
