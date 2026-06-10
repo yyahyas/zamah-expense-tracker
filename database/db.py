@@ -78,6 +78,26 @@ def get_user_by_id(user_id):
     return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
 
+def update_user(user_id, name, email):
+    db = get_db()
+    db.execute(
+        "UPDATE users SET name = ?, email = ? WHERE id = ?",
+        (name, email, user_id),
+    )
+    db.commit()
+    db.close()
+
+
+def update_password(user_id, new_password_hash):
+    db = get_db()
+    db.execute(
+        "UPDATE users SET password_hash = ? WHERE id = ?",
+        (new_password_hash, user_id),
+    )
+    db.commit()
+    db.close()
+
+
 def create_user(name, email, password):
     db = get_db()
     password_hash = generate_password_hash(password)
