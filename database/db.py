@@ -98,6 +98,52 @@ def update_password(user_id, new_password_hash):
     db.close()
 
 
+def get_expenses(user_id):
+    db = get_db()
+    rows = db.execute(
+        "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC",
+        (user_id,)
+    ).fetchall()
+    db.close()
+    return rows
+
+
+def get_expense_totals(user_id):
+    db = get_db()
+    total = db.execute(
+        "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()[0]
+    month_total = db.execute(
+        "SELECT COALESCE(SUM(amount), 0) FROM expenses "
+        "WHERE user_id = ? AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')",
+        (user_id,)
+    ).fetchone()[0]
+    top = db.execute(
+        "SELECT category FROM expenses WHERE user_id = ? "
+        "GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1",
+        (user_id,)
+    ).fetchone()
+    db.close()
+    return {
+        "total": total,
+        "month_total": month_total,
+        "top_category": top[0] if top else "—",
+    }
+
+
+def get_expenses_by_category(user_id):
+    db = get_db()
+    rows = db.execute(
+        "SELECT category, SUM(amount) as total, COUNT(*) as count "
+        "FROM expenses WHERE user_id = ? "
+        "GROUP BY category ORDER BY total DESC",
+        (user_id,)
+    ).fetchall()
+    db.close()
+    return rows
+
+
 def create_user(name, email, password):
     db = get_db()
     password_hash = generate_password_hash(password)

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Spending by Category — Zamah Expense Tracker{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+    <div class="dashboard-container">
+
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Spending by Category</h1>
+                <p class="dashboard-subtitle">Where your money goes</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn-ghost">&larr; Back to Dashboard</a>
+        </div>
+
+        {% if categories %}
+            {% for cat in categories %}
+            <div class="summary-card" style="margin-bottom:0.75rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                    <span style="font-weight:600; color:var(--ink);">{{ cat.category }}</span>
+                    <span style="font-size:0.8rem; color:var(--ink-muted);">{{ cat.count }} transaction{% if cat.count != 1 %}s{% endif %}</span>
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <div style="background:var(--border); border-radius:4px; height:8px; flex:1; margin:0 1rem;">
+                        <div style="background:var(--accent); border-radius:4px; height:8px; width:{{ (cat.total / categories[0].total * 100)|int }}%;"></div>
+                    </div>
+                    <span style="font-weight:600; color:var(--ink); white-space:nowrap;">₨ {{ "{:,.0f}".format(cat.total) }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="summary-card">
+                <p style="color:var(--ink-muted); text-align:center;">No expenses recorded yet.</p>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}
