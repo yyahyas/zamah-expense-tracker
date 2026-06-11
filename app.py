@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
-from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id, update_user, update_password
+from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id, update_user, update_password, get_expenses, get_expense_totals, get_expenses_by_category
 
 app = Flask(__name__)
 app.secret_key = "zamah-dev-secret"
@@ -87,7 +87,9 @@ def privacy():
 def dashboard():
     if not session.get("user_id"):
         return redirect(url_for("login"))
-    return render_template("dashboard.html")
+    totals = get_expense_totals(session["user_id"])
+    recent = get_expenses(session["user_id"])[:5]
+    return render_template("dashboard.html", totals=totals, recent=recent)
 
 
 @app.route("/logout")
@@ -168,6 +170,30 @@ def edit_expense(id):
 @app.route("/expenses/<int:id>/delete")
 def delete_expense(id):
     return "Delete expense — coming in Step 9"
+
+
+# ------------------------------------------------------------------ #
+# Transaction History                                                  #
+# ------------------------------------------------------------------ #
+
+@app.route("/expenses")
+def expense_list():
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+    expenses = get_expenses(session["user_id"])
+    return render_template("expenses.html", expenses=expenses)
+
+
+# ------------------------------------------------------------------ #
+# Category Breakdown                                                   #
+# ------------------------------------------------------------------ #
+
+@app.route("/expenses/categories")
+def category_breakdown():
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+    categories = get_expenses_by_category(session["user_id"])
+    return render_template("category_breakdown.html", categories=categories)
 
 
 if __name__ == "__main__":

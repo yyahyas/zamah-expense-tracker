@@ -15,23 +15,60 @@
         <div class="summary-cards">
             <div class="summary-card">
                 <p class="summary-label">Total Spent</p>
-                <p class="summary-value">₨ —</p>
+                <p class="summary-value">₨ {{ "{:,.0f}".format(totals.total) }}</p>
                 <p class="summary-note">All time</p>
             </div>
             <div class="summary-card">
                 <p class="summary-label">This Month</p>
-                <p class="summary-value">₨ —</p>
+                <p class="summary-value">₨ {{ "{:,.0f}".format(totals.month_total) }}</p>
                 <p class="summary-note">Current month</p>
             </div>
             <div class="summary-card">
                 <p class="summary-label">Top Category</p>
-                <p class="summary-value">—</p>
+                <p class="summary-value">{{ totals.top_category }}</p>
                 <p class="summary-note">By amount</p>
             </div>
         </div>
 
         <div class="dashboard-actions">
             <a href="{{ url_for('add_expense') }}" class="btn-primary">+ Add Expense</a>
+        </div>
+
+        <div>
+            <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:1rem;">
+                <h2 style="font-family:var(--font-display); font-size:1.25rem; color:var(--ink); margin:0;">Recent Transactions</h2>
+                <a href="{{ url_for('expense_list') }}" style="font-size:0.85rem; color:var(--accent); text-decoration:none;">View all &rarr;</a>
+            </div>
+
+            {% if recent %}
+            <div class="summary-card" style="padding:0; overflow:hidden;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted); font-weight:600;">Date</th>
+                            <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted); font-weight:600;">Category</th>
+                            <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted); font-weight:600;">Description</th>
+                            <th style="padding:0.75rem 1.25rem; text-align:right; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted); font-weight:600;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in recent %}
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <td style="padding:0.85rem 1.25rem; color:var(--ink-muted); font-size:0.875rem; white-space:nowrap;">{{ e.date }}</td>
+                            <td style="padding:0.85rem 1.25rem; color:var(--ink); font-size:0.875rem;">{{ e.category }}</td>
+                            <td style="padding:0.85rem 1.25rem; color:var(--ink-muted); font-size:0.875rem;">{{ e.description or '—' }}</td>
+                            <td style="padding:0.85rem 1.25rem; text-align:right; color:var(--ink); font-size:0.875rem; font-weight:600; white-space:nowrap;">₨ {{ "{:,.0f}".format(e.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="summary-card" style="text-align:center; padding:2rem 1.5rem;">
+                <p style="color:var(--ink-muted); margin:0 0 1rem;">No expenses yet.</p>
+                <a href="{{ url_for('add_expense') }}" class="btn-primary">+ Add your first expense</a>
+            </div>
+            {% endif %}
         </div>
 
     </div>

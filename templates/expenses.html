@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}My Expenses — Zamah Expense Tracker{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+    <div class="dashboard-container">
+
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">My Expenses</h1>
+                <p class="dashboard-subtitle">A record of every transaction</p>
+            </div>
+            <div>
+                <a href="{{ url_for('add_expense') }}" class="btn-primary">+ Add Expense</a>
+            </div>
+        </div>
+
+        {% if expenses %}
+        <div class="summary-card" style="padding: 0; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border); background: var(--paper-card);">
+                        <th style="padding: 0.85rem 1.25rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); font-weight: 600;">Date</th>
+                        <th style="padding: 0.85rem 1.25rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); font-weight: 600;">Category</th>
+                        <th style="padding: 0.85rem 1.25rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); font-weight: 600;">Description</th>
+                        <th style="padding: 0.85rem 1.25rem; text-align: right; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); font-weight: 600;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 0.9rem 1.25rem; color: var(--ink-muted); font-size: 0.875rem; white-space: nowrap;">{{ expense.date }}</td>
+                        <td style="padding: 0.9rem 1.25rem; color: var(--ink); font-size: 0.875rem;">{{ expense.category }}</td>
+                        <td style="padding: 0.9rem 1.25rem; color: var(--ink-muted); font-size: 0.875rem;">{{ expense.description or '—' }}</td>
+                        <td style="padding: 0.9rem 1.25rem; text-align: right; color: var(--ink); font-size: 0.875rem; font-weight: 600; white-space: nowrap;">₨ {{ "{:,.0f}".format(expense.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="summary-card" style="text-align: center; padding: 3rem 1.5rem;">
+            <p style="color: var(--ink-muted); font-size: 1rem; margin: 0 0 1.25rem;">No expenses yet. Add your first one!</p>
+            <a href="{{ url_for('add_expense') }}" class="btn-primary">+ Add Expense</a>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}
