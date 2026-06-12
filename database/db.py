@@ -132,6 +132,16 @@ def get_expense_totals(user_id):
     }
 
 
+def get_expenses_filtered(user_id, from_date, to_date):
+    db = get_db()
+    rows = db.execute(
+        "SELECT * FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC",
+        (user_id, from_date, to_date)
+    ).fetchall()
+    db.close()
+    return rows
+
+
 def get_expenses_by_category(user_id):
     db = get_db()
     rows = db.execute(

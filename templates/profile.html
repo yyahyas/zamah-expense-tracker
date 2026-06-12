@@ -7,8 +7,9 @@
 <section class="dashboard-section">
     <div class="dashboard-container">
 
+        <!-- Profile header -->
         <div class="dashboard-header">
-            <h1 class="dashboard-title">Your <em>profile</em></h1>
+            <h1 class="dashboard-title">Your <em>profile</em> — {{ user['name'] }}</h1>
             <p class="dashboard-subtitle">Manage your account details and password.</p>
         </div>
 
@@ -18,6 +19,66 @@
         <div class="auth-error">{{ error }}</div>
         {% endif %}
 
+        <!-- Date filter bar -->
+        <div class="filter-bar">
+            <div class="filter-presets">
+                <a href="{{ url_for('profile') }}?period=all"
+                   class="filter-preset{% if period == 'all' %} active{% endif %}">All Time</a>
+                <a href="{{ url_for('profile') }}?period=month"
+                   class="filter-preset{% if period == 'month' %} active{% endif %}">This Month</a>
+                <a href="{{ url_for('profile') }}?period=6months"
+                   class="filter-preset{% if period == '6months' %} active{% endif %}">Last 6 Months</a>
+                <button class="filter-preset{% if period == 'custom' %} active{% endif %}"
+                        id="custom-toggle" type="button">Custom Range</button>
+            </div>
+
+            <form class="custom-date-form{% if period != 'custom' %} hidden{% endif %}"
+                  id="custom-date-form" method="get" action="{{ url_for('profile') }}">
+                <input type="hidden" name="period" value="custom">
+                <div class="date-range-inputs">
+                    <input class="form-input date-compact" type="date" name="from_date" value="{{ from_date }}">
+                    <span class="date-sep">to</span>
+                    <input class="form-input date-compact" type="date" name="to_date" value="{{ to_date }}">
+                    <button class="btn-apply" type="submit">Apply</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filtered summary -->
+        <p class="filter-summary">
+            Total: <strong>₨ {{ "{:,.2f}".format(filtered_total) }}</strong>
+            &nbsp;·&nbsp; {{ expenses|length }} expense{{ 's' if expenses|length != 1 else '' }}
+        </p>
+
+        <!-- Expense table -->
+        {% if expenses %}
+        <div class="summary-card" style="overflow-x:auto; padding:0; margin-bottom:2rem">
+            <table style="width:100%; border-collapse:collapse; font-family:var(--font-body)">
+                <thead>
+                    <tr style="border-bottom:2px solid var(--border)">
+                        <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Date</th>
+                        <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Category</th>
+                        <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Description</th>
+                        <th style="padding:0.75rem 1.25rem; text-align:right; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Amount (PKR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr style="border-bottom:1px solid var(--border-soft)">
+                        <td style="padding:0.9rem 1.25rem; color:var(--ink-muted); font-size:0.875rem">{{ expense['date'] }}</td>
+                        <td style="padding:0.9rem 1.25rem; font-size:0.875rem">{{ expense['category'] }}</td>
+                        <td style="padding:0.9rem 1.25rem; color:var(--ink-soft); font-size:0.875rem">{{ expense['description'] or '—' }}</td>
+                        <td style="padding:0.9rem 1.25rem; text-align:right; font-weight:600; font-size:0.875rem">₨ {{ "{:,.2f}".format(expense['amount']) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-state" style="margin-bottom:2rem">No expenses found for this period.</p>
+        {% endif %}
+
+        <!-- Account management -->
         <div class="profile-grid">
 
             <!-- Account details -->
@@ -72,5 +133,17 @@
 
     </div>
 </section>
+
+<script>
+(function () {
+    const toggle = document.getElementById('custom-toggle');
+    const form   = document.getElementById('custom-date-form');
+    toggle.addEventListener('click', function () {
+        const open = !form.classList.contains('hidden');
+        form.classList.toggle('hidden', open);
+        toggle.classList.toggle('active', !open);
+    });
+}());
+</script>
 
 {% endblock %}
