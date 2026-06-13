@@ -1,18 +1,39 @@
 import sqlite3
 import os
+from flask import current_app, has_app_context
 from werkzeug.security import generate_password_hash, check_password_hash
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "zamah.db")
 
 
+_memory_db_keeper = None  # holds shared in-memory DB alive between get_db() calls
+
+
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    path = current_app.config.get("DATABASE", DB_PATH) if has_app_context() else DB_PATH
+    # SQLite destroys :memory: DBs when the last connection closes. Use the
+    # shared-cache URI so all connections in the process see the same DB, and
+    # keep _memory_db_keeper open so the DB survives between get_db() calls.
+    if path == ":memory:":
+        conn = sqlite3.connect("file::memory:?cache=shared", uri=True)
+    else:
+        conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
 def init_db():
+    global _memory_db_keeper
+    path = current_app.config.get("DATABASE", DB_PATH) if has_app_context() else DB_PATH
+
+    if path == ":memory:":
+        # Close old keeper → destroys previous shared DB → opens fresh empty one.
+        if _memory_db_keeper is not None:
+            _memory_db_keeper.close()
+        _memory_db_keeper = sqlite3.connect("file::memory:?cache=shared", uri=True)
+        _memory_db_keeper.execute("PRAGMA foreign_keys = ON")
+
     db = get_db()
     db.executescript("""
         CREATE TABLE IF NOT EXISTS users (
@@ -70,12 +91,16 @@ def seed_db():
 
 def get_user_by_email(email):
     db = get_db()
-    return db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    row = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    db.close()
+    return row
 
 
 def get_user_by_id(user_id):
     db = get_db()
-    return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    row = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    db.close()
+    return row
 
 
 def update_user(user_id, name, email):
@@ -157,9 +182,12 @@ def get_expenses_by_category(user_id):
 def create_user(name, email, password):
     db = get_db()
     password_hash = generate_password_hash(password)
-    cursor = db.execute(
-        "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-        (name, email, password_hash),
-    )
-    db.commit()
-    return cursor.lastrowid
+    try:
+        cursor = db.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+            (name, email, password_hash),
+        )
+        db.commit()
+        return cursor.lastrowid
+    finally:
+        db.close()
