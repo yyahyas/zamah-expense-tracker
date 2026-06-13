@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
-from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id, update_user, update_password, get_expenses, get_expense_totals, get_expenses_by_category
+from datetime import date
+import calendar
+from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id, update_user, update_password, get_expenses, get_expense_totals, get_expenses_by_category, get_expenses_filtered
 
 app = Flask(__name__)
 app.secret_key = "zamah-dev-secret"
@@ -102,12 +104,61 @@ def logout():
 def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
+
+    today = date.today()
+    period = request.args.get("period", "month")
+
+    def _valid_date(s):
+        try:
+            date.fromisoformat(s)
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    if period == "all":
+        from_date = ""
+        to_date = ""
+        expenses = get_expenses(session["user_id"])
+    elif period == "6months":
+        month = today.month - 6
+        year = today.year
+        if month <= 0:
+            month += 12
+            year -= 1
+        try:
+            start = date(year, month, today.day)
+        except ValueError:
+            start = date(year, month, calendar.monthrange(year, month)[1])
+        from_date = start.strftime("%Y-%m-%d")
+        to_date = today.strftime("%Y-%m-%d")
+        expenses = get_expenses_filtered(session["user_id"], from_date, to_date)
+    elif period == "custom":
+        from_date = request.args.get("from_date", "")
+        to_date = request.args.get("to_date", "")
+        if not _valid_date(from_date):
+            from_date = today.replace(day=1).strftime("%Y-%m-%d")
+        if not _valid_date(to_date):
+            to_date = today.replace(day=calendar.monthrange(today.year, today.month)[1]).strftime("%Y-%m-%d")
+        expenses = get_expenses_filtered(session["user_id"], from_date, to_date)
+    else:
+        period = "month"
+        from_date = today.replace(day=1).strftime("%Y-%m-%d")
+        to_date = today.replace(day=calendar.monthrange(today.year, today.month)[1]).strftime("%Y-%m-%d")
+        expenses = get_expenses_filtered(session["user_id"], from_date, to_date)
+
+    filtered_total = sum(row["amount"] for row in expenses)
     user = get_user_by_id(session["user_id"])
+
     return render_template(
         "profile.html",
         user=user,
         message=request.args.get("message"),
         error=request.args.get("error"),
+        expenses=expenses,
+        filtered_total=filtered_total,
+        from_date=from_date,
+        to_date=to_date,
+        period=period,
     )
 
 
