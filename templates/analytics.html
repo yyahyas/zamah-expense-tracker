@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics — Zamah Expense Tracker{% endblock %}
+
+{% block content %}
+
+<section class="coming-soon-section">
+    <div class="coming-soon-inner">
+
+        <div class="coming-soon-badge">Coming Soon</div>
+
+        <h1 class="coming-soon-title">
+            Insights that <em>move</em> with you
+        </h1>
+
+        <p class="coming-soon-subtitle">
+            Analytics is on its way — giving you a full picture of your spending patterns,
+            category trends, and monthly comparisons in one place.
+        </p>
+
+        <div class="coming-soon-features">
+            <div class="coming-soon-feature">
+                <span class="coming-soon-feature-icon">▲</span>
+                <div>
+                    <p class="coming-soon-feature-title">Spending Trends</p>
+                    <p class="coming-soon-feature-body">See how your spending evolves week over week and month over month.</p>
+                </div>
+            </div>
+            <div class="coming-soon-feature">
+                <span class="coming-soon-feature-icon">◉</span>
+                <div>
+                    <p class="coming-soon-feature-title">Category Breakdown</p>
+                    <p class="coming-soon-feature-body">Visualise exactly where your rupees go, by category and date range.</p>
+                </div>
+            </div>
+            <div class="coming-soon-feature">
+                <span class="coming-soon-feature-icon">≡</span>
+                <div>
+                    <p class="coming-soon-feature-title">Monthly Comparisons</p>
+                    <p class="coming-soon-feature-body">Compare any two months side by side to track progress over time.</p>
+                </div>
+            </div>
+        </div>
+
+        <a href="{{ url_for('dashboard') }}" class="btn-ghost">Back to Dashboard</a>
+
+    </div>
+</section>
+
+{% endblock %}

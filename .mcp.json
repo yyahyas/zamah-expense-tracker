@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-sqlite",
+        "--db-path",
+        "C:\\Users\\SAMAUNG\\Downloads\\CLAUDE CODE\\zamah-expense-tracker\\zamah.db"
+      ]
+    }
+  }
+}
