@@ -43,7 +43,7 @@ proceeding to Step 2.
 
 ## Step 2: Run Tests
 
-Once spendly-test-writer has finished, invoke the 
+Once zamah-test-writer has finished, invoke the 
 **zamah-test-runner** subagent with the following
 context:
 
