@@ -5,8 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 **Zamah Expense Tracker** — a Flask-based personal expense tracking web app.
-- Previously named "Spendly"; all references should use "Zamah" now
-- Database file: `zamah.db` (renamed from `spendly.db`)
+- Database file: `zamah.db`
 - Currency: PKR (Pakistani Rupees, ₨) — use PKR formatting everywhere
 
 ## Commands

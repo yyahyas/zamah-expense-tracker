@@ -2,7 +2,9 @@ from flask import Flask, render_template, request, session, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
 import calendar
-from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id, update_user, update_password, get_expenses, get_expense_totals, get_expenses_by_category, get_expenses_filtered
+import math
+import re
+from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id, update_user, update_password, get_expenses, get_expense_totals, get_expenses_by_category, get_expenses_filtered, create_expense
 
 app = Flask(__name__)
 app.secret_key = "zamah-dev-secret"
@@ -215,9 +217,62 @@ def analytics():
     return render_template("analytics.html")
 
 
-@app.route("/expenses/add")
+VALID_CATEGORIES = ["Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other"]
+
+
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        amount_str = request.form.get("amount", "").strip()
+        category = request.form.get("category", "").strip()
+        date_str = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip()
+
+        error = None
+        amount = None
+
+        if not amount_str:
+            error = "Amount is required."
+        else:
+            try:
+                amount = float(amount_str)
+                if math.isinf(amount) or math.isnan(amount) or amount <= 0:
+                    error = "Amount must be a valid positive number."
+            except ValueError:
+                error = "Amount must be a valid number."
+
+        if not error and category not in VALID_CATEGORIES:
+            error = "Please select a valid category."
+
+        _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+        if not error:
+            if not date_str or not _DATE_RE.match(date_str):
+                error = "Please enter a valid date."
+            else:
+                try:
+                    date.fromisoformat(date_str)
+                except ValueError:
+                    error = "Please enter a valid date."
+
+        if error:
+            return render_template(
+                "expenses/add.html",
+                error=error,
+                amount=amount_str,
+                category=category,
+                date=date_str,
+                description=description,
+                categories=VALID_CATEGORIES,
+            )
+
+        create_expense(session["user_id"], amount, category, date_str, description)
+        return redirect(url_for("expense_list"))
+
+    today = date.today().strftime("%Y-%m-%d")
+    return render_template("expenses/add.html", date=today, categories=VALID_CATEGORIES)
 
 
 @app.route("/expenses/<int:id>/edit")
