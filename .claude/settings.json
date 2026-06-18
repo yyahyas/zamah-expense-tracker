@@ -15,6 +15,17 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"C:\\Users\\SAMAUNG\\Downloads\\CLAUDE CODE\\zamah-expense-tracker\\.claude\\hooks\\formatter.py\""
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
