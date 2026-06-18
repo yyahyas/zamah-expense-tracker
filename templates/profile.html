@@ -60,6 +60,7 @@
                         <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Category</th>
                         <th style="padding:0.75rem 1.25rem; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Description</th>
                         <th style="padding:0.75rem 1.25rem; text-align:right; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Amount (PKR)</th>
+                        <th style="padding:0.75rem 1.25rem; text-align:right; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted)">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,6 +70,9 @@
                         <td style="padding:0.9rem 1.25rem; font-size:0.875rem">{{ expense['category'] }}</td>
                         <td style="padding:0.9rem 1.25rem; color:var(--ink-soft); font-size:0.875rem">{{ expense['description'] or '—' }}</td>
                         <td style="padding:0.9rem 1.25rem; text-align:right; font-weight:600; font-size:0.875rem">₨ {{ "{:,.2f}".format(expense['amount']) }}</td>
+                        <td style="padding:0.9rem 1.25rem; text-align:right; white-space:nowrap;">
+                            <a href="{{ url_for('edit_expense', id=expense['id']) }}" style="font-size:0.8rem; color:var(--ink-muted); text-decoration:none; border:1px solid var(--border); border-radius:4px; padding:0.25rem 0.6rem;">Edit</a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
