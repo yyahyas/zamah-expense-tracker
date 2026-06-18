@@ -1,10 +1,25 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
 import calendar
 import math
 import re
-from database.db import init_db, seed_db, create_user, get_user_by_email, get_user_by_id, update_user, update_password, get_expenses, get_expense_totals, get_expenses_by_category, get_expenses_filtered, create_expense
+from database.db import (
+    init_db,
+    seed_db,
+    create_user,
+    get_user_by_email,
+    get_user_by_id,
+    update_user,
+    update_password,
+    get_expenses,
+    get_expense_totals,
+    get_expenses_by_category,
+    get_expenses_filtered,
+    create_expense,
+    get_expense_by_id,
+    update_expense,
+)
 
 app = Flask(__name__)
 app.secret_key = "zamah-dev-secret"
@@ -17,6 +32,7 @@ with app.app_context():
 # ------------------------------------------------------------------ #
 # Routes                                                              #
 # ------------------------------------------------------------------ #
+
 
 @app.route("/")
 def landing():
@@ -35,15 +51,31 @@ def register():
         confirm_password = request.form.get("confirm_password", "")
 
         if not name:
-            return render_template("register.html", error="Name is required.", name=name, email=email)
+            return render_template(
+                "register.html", error="Name is required.", name=name, email=email
+            )
         if not email:
-            return render_template("register.html", error="Email is required.", name=name, email=email)
+            return render_template(
+                "register.html", error="Email is required.", name=name, email=email
+            )
         if len(password) < 8:
-            return render_template("register.html", error="Password must be at least 8 characters.", name=name, email=email)
+            return render_template(
+                "register.html",
+                error="Password must be at least 8 characters.",
+                name=name,
+                email=email,
+            )
         if password != confirm_password:
-            return render_template("register.html", error="Passwords do not match.", name=name, email=email)
+            return render_template(
+                "register.html", error="Passwords do not match.", name=name, email=email
+            )
         if get_user_by_email(email):
-            return render_template("register.html", error="Email already registered.", name=name, email=email)
+            return render_template(
+                "register.html",
+                error="Email already registered.",
+                name=name,
+                email=email,
+            )
 
         user_id = create_user(name, email, password)
         session["user_id"] = user_id
@@ -63,8 +95,14 @@ def login():
         password = request.form.get("password", "")
 
         user = get_user_by_email(email) if email else None
-        if not user or not password or not check_password_hash(user["password_hash"], password):
-            return render_template("login.html", error="Invalid email or password.", email=email)
+        if (
+            not user
+            or not password
+            or not check_password_hash(user["password_hash"], password)
+        ):
+            return render_template(
+                "login.html", error="Invalid email or password.", email=email
+            )
 
         session["user_id"] = user["id"]
         session["user_name"] = user["name"]
@@ -86,6 +124,7 @@ def privacy():
 # ------------------------------------------------------------------ #
 # Placeholder routes — students will implement these                  #
 # ------------------------------------------------------------------ #
+
 
 @app.route("/dashboard")
 def dashboard():
@@ -140,12 +179,16 @@ def profile():
         if not _valid_date(from_date):
             from_date = today.replace(day=1).strftime("%Y-%m-%d")
         if not _valid_date(to_date):
-            to_date = today.replace(day=calendar.monthrange(today.year, today.month)[1]).strftime("%Y-%m-%d")
+            to_date = today.replace(
+                day=calendar.monthrange(today.year, today.month)[1]
+            ).strftime("%Y-%m-%d")
         expenses = get_expenses_filtered(session["user_id"], from_date, to_date)
     else:
         period = "month"
         from_date = today.replace(day=1).strftime("%Y-%m-%d")
-        to_date = today.replace(day=calendar.monthrange(today.year, today.month)[1]).strftime("%Y-%m-%d")
+        to_date = today.replace(
+            day=calendar.monthrange(today.year, today.month)[1]
+        ).strftime("%Y-%m-%d")
         expenses = get_expenses_filtered(session["user_id"], from_date, to_date)
 
     filtered_total = sum(row["amount"] for row in expenses)
@@ -179,7 +222,9 @@ def profile_update():
 
     existing = get_user_by_email(email)
     if existing and existing["id"] != session["user_id"]:
-        return redirect(url_for("profile", error="That email is already used by another account."))
+        return redirect(
+            url_for("profile", error="That email is already used by another account.")
+        )
 
     update_user(session["user_id"], name, email)
     session["user_name"] = name
@@ -198,7 +243,9 @@ def profile_password():
     if not current_password:
         return redirect(url_for("profile", error="Current password is required."))
     if len(new_password) < 8:
-        return redirect(url_for("profile", error="New password must be at least 8 characters."))
+        return redirect(
+            url_for("profile", error="New password must be at least 8 characters.")
+        )
     if new_password != confirm_password:
         return redirect(url_for("profile", error="New passwords do not match."))
 
@@ -217,7 +264,15 @@ def analytics():
     return render_template("analytics.html")
 
 
-VALID_CATEGORIES = ["Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other"]
+VALID_CATEGORIES = [
+    "Food",
+    "Transport",
+    "Bills",
+    "Health",
+    "Entertainment",
+    "Shopping",
+    "Other",
+]
 
 
 @app.route("/expenses/add", methods=["GET", "POST"])
@@ -275,9 +330,73 @@ def add_expense():
     return render_template("expenses/add.html", date=today, categories=VALID_CATEGORIES)
 
 
-@app.route("/expenses/<int:id>/edit")
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
 def edit_expense(id):
-    return "Edit expense — coming in Step 8"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    expense = get_expense_by_id(id)
+    if expense is None:
+        abort(404)
+    if expense["user_id"] != session["user_id"]:
+        abort(403)
+
+    if request.method == "POST":
+        amount_str = request.form.get("amount", "").strip()
+        category = request.form.get("category", "").strip()
+        date_str = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip()
+
+        error = None
+        amount = None
+
+        if not amount_str:
+            error = "Amount is required."
+        else:
+            try:
+                amount = float(amount_str)
+                if math.isinf(amount) or math.isnan(amount) or amount <= 0:
+                    error = "Amount must be a valid positive number."
+            except ValueError:
+                error = "Amount must be a valid number."
+
+        if not error and category not in VALID_CATEGORIES:
+            error = "Please select a valid category."
+
+        _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+        if not error:
+            if not date_str or not _DATE_RE.match(date_str):
+                error = "Please enter a valid date."
+            else:
+                try:
+                    date.fromisoformat(date_str)
+                except ValueError:
+                    error = "Please enter a valid date."
+
+        if error:
+            return render_template(
+                "expenses/edit.html",
+                error=error,
+                expense=expense,
+                amount=amount_str,
+                category=category,
+                date=date_str,
+                description=description,
+                categories=VALID_CATEGORIES,
+            )
+
+        update_expense(id, amount, category, date_str, description)
+        return redirect(url_for("expense_list"))
+
+    return render_template(
+        "expenses/edit.html",
+        expense=expense,
+        amount=expense["amount"],
+        category=expense["category"],
+        date=expense["date"],
+        description=expense["description"] or "",
+        categories=VALID_CATEGORIES,
+    )
 
 
 @app.route("/expenses/<int:id>/delete")
@@ -288,6 +407,7 @@ def delete_expense(id):
 # ------------------------------------------------------------------ #
 # Transaction History                                                  #
 # ------------------------------------------------------------------ #
+
 
 @app.route("/expenses")
 def expense_list():
@@ -300,6 +420,7 @@ def expense_list():
 # ------------------------------------------------------------------ #
 # Category Breakdown                                                   #
 # ------------------------------------------------------------------ #
+
 
 @app.route("/expenses/categories")
 def category_breakdown():

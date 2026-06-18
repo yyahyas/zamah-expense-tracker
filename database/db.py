@@ -3,7 +3,9 @@ import os
 from flask import current_app, has_app_context
 from werkzeug.security import generate_password_hash, check_password_hash
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "zamah.db")
+DB_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "zamah.db"
+)
 
 
 _memory_db_keeper = None  # holds shared in-memory DB alive between get_db() calls
@@ -70,19 +72,21 @@ def seed_db():
     )
     db.commit()
 
-    user_id = db.execute("SELECT id FROM users WHERE email = ?", ("demo@zamah.com",)).fetchone()[0]
+    user_id = db.execute(
+        "SELECT id FROM users WHERE email = ?", ("demo@zamah.com",)
+    ).fetchone()[0]
 
     db.executemany(
         "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
         [
-            (user_id,  850.00, "Food",          "2026-06-01", "Breakfast at café"),
-            (user_id, 2500.00, "Transport",      "2026-05-29", "Fuel refill"),
-            (user_id, 15000.00, "Bills",         "2026-05-27", "Electricity bill"),
-            (user_id, 3200.00, "Health",         "2026-05-25", "Pharmacy"),
-            (user_id, 1200.00, "Entertainment",  "2026-05-22", "Cinema tickets"),
-            (user_id, 4500.00, "Shopping",       "2026-05-20", "Grocery run"),
-            (user_id,  900.00, "Other",          "2026-05-18", "Miscellaneous"),
-            (user_id, 1800.00, "Food",           "2026-05-15", "Dinner with family"),
+            (user_id, 850.00, "Food", "2026-06-01", "Breakfast at café"),
+            (user_id, 2500.00, "Transport", "2026-05-29", "Fuel refill"),
+            (user_id, 15000.00, "Bills", "2026-05-27", "Electricity bill"),
+            (user_id, 3200.00, "Health", "2026-05-25", "Pharmacy"),
+            (user_id, 1200.00, "Entertainment", "2026-05-22", "Cinema tickets"),
+            (user_id, 4500.00, "Shopping", "2026-05-20", "Grocery run"),
+            (user_id, 900.00, "Other", "2026-05-18", "Miscellaneous"),
+            (user_id, 1800.00, "Food", "2026-05-15", "Dinner with family"),
         ],
     )
     db.commit()
@@ -126,8 +130,7 @@ def update_password(user_id, new_password_hash):
 def get_expenses(user_id):
     db = get_db()
     rows = db.execute(
-        "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC",
-        (user_id,)
+        "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC", (user_id,)
     ).fetchall()
     db.close()
     return rows
@@ -136,18 +139,17 @@ def get_expenses(user_id):
 def get_expense_totals(user_id):
     db = get_db()
     total = db.execute(
-        "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?",
-        (user_id,)
+        "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?", (user_id,)
     ).fetchone()[0]
     month_total = db.execute(
         "SELECT COALESCE(SUM(amount), 0) FROM expenses "
         "WHERE user_id = ? AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')",
-        (user_id,)
+        (user_id,),
     ).fetchone()[0]
     top = db.execute(
         "SELECT category FROM expenses WHERE user_id = ? "
         "GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1",
-        (user_id,)
+        (user_id,),
     ).fetchone()
     db.close()
     return {
@@ -161,7 +163,7 @@ def get_expenses_filtered(user_id, from_date, to_date):
     db = get_db()
     rows = db.execute(
         "SELECT * FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC",
-        (user_id, from_date, to_date)
+        (user_id, from_date, to_date),
     ).fetchall()
     db.close()
     return rows
@@ -173,7 +175,7 @@ def get_expenses_by_category(user_id):
         "SELECT category, SUM(amount) as total, COUNT(*) as count "
         "FROM expenses WHERE user_id = ? "
         "GROUP BY category ORDER BY total DESC",
-        (user_id,)
+        (user_id,),
     ).fetchall()
     db.close()
     return rows
@@ -204,3 +206,20 @@ def create_expense(user_id, amount, category, expense_date, description):
         return cursor.lastrowid
     finally:
         db.close()
+
+
+def get_expense_by_id(expense_id):
+    db = get_db()
+    row = db.execute("SELECT * FROM expenses WHERE id = ?", (expense_id,)).fetchone()
+    db.close()
+    return row
+
+
+def update_expense(expense_id, amount, category, expense_date, description):
+    db = get_db()
+    db.execute(
+        "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? WHERE id = ?",
+        (amount, category, expense_date, description or None, expense_id),
+    )
+    db.commit()
+    db.close()
