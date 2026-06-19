@@ -72,6 +72,9 @@
                         <td style="padding:0.9rem 1.25rem; text-align:right; font-weight:600; font-size:0.875rem">₨ {{ "{:,.2f}".format(expense['amount']) }}</td>
                         <td style="padding:0.9rem 1.25rem; text-align:right; white-space:nowrap;">
                             <a href="{{ url_for('edit_expense', id=expense['id']) }}" style="font-size:0.8rem; color:var(--ink-muted); text-decoration:none; border:1px solid var(--border); border-radius:4px; padding:0.25rem 0.6rem;">Edit</a>
+                            <form method="POST" action="{{ url_for('delete_expense', id=expense['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this expense?')">
+                                <button type="submit" style="font-size:0.8rem; color:var(--danger); background:none; border:1px solid var(--danger); border-radius:4px; padding:0.25rem 0.6rem; cursor:pointer;">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
